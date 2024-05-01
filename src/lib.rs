@@ -3,17 +3,20 @@ use std::io::{self, ErrorKind};
 
 pub struct SSHTunnel {
     pub destination: String,
-    pub ssh_port: u16,
+    pub ssh_port: Option<u16>,
     pub remote_port: u16,
     pub local_port: u16,
 }
 
 impl SSHTunnel {
     pub fn start_tunnel(&self) -> Result<(), std::io::Error> {
-        let command = format!(
-            "ssh -NfL localhost:{}:localhost:{} {} -p {}",
-            self.local_port, self.remote_port, self.destination, self.ssh_port
+        let mut command = format!(
+            "ssh -NfL localhost:{}:localhost:{} {}",
+            self.local_port, self.remote_port, self.destination
         );
+        if let Some(port) = self.ssh_port {
+            command.push_str(&format!(" -p {}", port));
+        }
 
         // Execute the command and capture any potential errors
         let child = Command::new("sh")

@@ -19,14 +19,16 @@ struct Args {
     /// Local machine's port to host the remote server's localhost. Defaults to same as remote port.
     #[arg(required = false)]
     local_port: Option<u16>,
+
+    /// SSH port of the remote server. Defaults to one specified in SSH config.
+    #[arg(short, required = false)]
+    p: Option<u16>,
 }
 
 impl Args {
     fn to_ssh_tunnel(&self) -> SSHTunnel {
         let destination = self.destination.clone();
-        let destination_parts: Vec<&str> = destination.split(':').collect();
-        let destination = String::from(destination_parts[0]);
-        let ssh_port = destination_parts.get(1).unwrap_or(&"22").parse::<u16>().unwrap();
+        let ssh_port = self.p;
         let remote_port = self.remote_port;
         let local_port = self.local_port.unwrap_or(remote_port);
 
